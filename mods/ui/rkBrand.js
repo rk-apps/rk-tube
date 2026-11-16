@@ -30,13 +30,21 @@ function mountBrand() {
     el.appendChild(sub);
     document.body.appendChild(el);
 
-    // rk-tube: the owner asked for the sign-in page to stay exactly as in TizenTube,
-    // so the brand never covers it. The activation screen is the only one carrying the
-    // 'yt.be/activate' marker; hide the brand while that marker is on screen.
-    function syncBrandVisibility() {
-        const onSignIn = !!document.body && document.body.textContent.includes('yt.be/activate');
-        el.style.display = onSignIn ? 'none' : '';
+    // rk-tube: the brand is approved only for the main page. Default is hidden:
+    // it shows only when the route is home (hash '/' or the Principal browseId
+    // FEtopics, the same route signals adblock.js uses) AND the main app guide
+    // (ytlr-guide-response) exists. The sign-in screen and any unknown route
+    // therefore stay exactly as in TizenTube.
+    function isMainPage() {
+        const hash = location.hash.substring(1);
+        const homeRoute = hash === '/' || hash.includes('c=FEtopics');
+        const mainUiPresent = !!document.querySelector('ytlr-guide-response');
+        return homeRoute && mainUiPresent;
     }
+    function syncBrandVisibility() {
+        el.style.display = isMainPage() ? '' : 'none';
+    }
+    window.addEventListener('hashchange', syncBrandVisibility);
     setInterval(syncBrandVisibility, 700);
     syncBrandVisibility();
 }
