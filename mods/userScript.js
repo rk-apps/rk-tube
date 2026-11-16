@@ -27,4 +27,3 @@ import "./ui/customGuideAction.js";
 import "./features/autoFrameRate.js";
 import "./ui/clock.js";
 
-import "./ui/principalVisual.js";
