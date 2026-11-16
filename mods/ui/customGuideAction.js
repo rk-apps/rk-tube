@@ -85,21 +85,32 @@ JSON.parse = function () {
         }
     }
 
-    // Visual navigation list requested for this copy. Keep native commands.
+    // Retain the original endpoints, but arrange only the requested visible menu.
     if (r.items?.[0]?.guideSectionRenderer) {
-        const allowed = ['search', 'FEtopics', 'FEsubscriptions', 'FElibrary', 'FEmy_youtube'];
-        for (const sectionEntry of r.items) {
-            const section = sectionEntry.guideSectionRenderer;
+        const ids = ['search', 'FEtopics', 'FEsubscriptions', 'FElibrary'];
+        const entries = [];
+        let settings;
+        const sections = [...r.items, r.footer];
+        for (const sectionEntry of sections) {
+            const section = sectionEntry?.guideSectionRenderer;
             if (!Array.isArray(section?.items)) continue;
-            section.items = section.items.filter(entry => {
+            for (const entry of section.items) {
                 const item = entry.guideEntryRenderer;
-                if (!item) return true;
-                const endpoint = item.navigationEndpoint;
-                if (endpoint?.applicationSettingsEndpoint || endpoint?.signalServiceEndpoint?.signal === 'SETTINGS' || item.icon?.iconType === 'SETTINGS') return true;
-                const id = endpoint?.browseEndpoint?.browseId || (endpoint?.searchEndpoint ? 'search' : null);
-                return allowed.includes(id);
-            });
+                const endpoint = item?.navigationEndpoint;
+                if (endpoint?.applicationSettingsEndpoint || endpoint?.signalServiceEndpoint?.signal === 'SETTINGS' || item?.icon?.iconType === 'SETTINGS') settings = entry;
+                else if (item) entries.push(entry);
+            }
         }
+        const ordered = ids.map(id => entries.find(entry => {
+            const ep = entry.guideEntryRenderer.navigationEndpoint;
+            return id === 'search' ? !!ep?.searchEndpoint : ep?.browseEndpoint?.browseId === id;
+        })).filter(Boolean);
+        if (settings) ordered.push(settings);
+        r.items[0].guideSectionRenderer.items = ordered;
+        for (const sectionEntry of r.items.slice(1)) {
+            if (sectionEntry.guideSectionRenderer) sectionEntry.guideSectionRenderer.items = [];
+        }
+        if (r.footer?.guideSectionRenderer) r.footer.guideSectionRenderer.items = [];
     }
 
     return r;
