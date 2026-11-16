@@ -120,12 +120,21 @@ JSON.parse = function () {
                 }
             }
         }
-        // rk-tube: Shorts on/off control moved to the main sidebar (out of Settings > Misc).
-        // Guide entries have no text-checkbox renderer; the checkbox state is shown in the icon.
+        // rk-tube: Shorts on/off control moved to the main sidebar (out of Settings > Misc),
+        // as TWO rows per the approved design: a "Shorts" label row and, below it, the
+        // "Habilitar" row carrying the checkbox state. Guide entries have no text-checkbox
+        // renderer; the checkbox state is shown in the icon of the "Habilitar" row.
         const firstSection = r.items[0].guideSectionRenderer;
-        if (!firstSection.items.some(it => it.guideEntryRenderer?.navigationEndpoint?.browseEndpoint?.browseId === 'TT_SHORTS_TOGGLE')) {
+        if (!firstSection.items.some(it => it.guideEntryRenderer?.navigationEndpoint?.browseEndpoint?.browseId === 'TT_SHORTS_LABEL')) {
             firstSection.items.push(GuideEntryRenderer(
                 'Shorts',
+                { browseEndpoint: { browseId: 'TT_SHORTS_LABEL' } },
+                'YOUTUBE_SHORTS_FILL_24'
+            ));
+        }
+        if (!firstSection.items.some(it => it.guideEntryRenderer?.navigationEndpoint?.browseEndpoint?.browseId === 'TT_SHORTS_TOGGLE')) {
+            firstSection.items.push(GuideEntryRenderer(
+                'Habilitar',
                 { browseEndpoint: { browseId: 'TT_SHORTS_TOGGLE' } },
                 configRead('enableShorts') ? 'CHECK_BOX' : 'CHECK_BOX_OUTLINE_BLANK'
             ));

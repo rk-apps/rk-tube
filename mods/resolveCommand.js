@@ -66,6 +66,9 @@ export function patchResolveCommand() {
                             return true;
                         }
                     }
+                } else if (cmd?.browseEndpoint?.browseId === 'TT_SHORTS_LABEL') {
+                    // rk-tube: "Shorts" sidebar label row - intentional no-op, the toggle lives in the "Habilitar" row below it
+                    return true;
                 } else if (cmd?.browseEndpoint?.browseId === 'TT_SHORTS_TOGGLE') {
                     // rk-tube: sidebar Shorts toggle
                     customAction('TOGGLE_SHORTS');
