@@ -225,7 +225,7 @@ function execute_once_dom_loaded() {
   document.addEventListener('keyup', eventHandler, true);
   if (configRead('showWelcomeToast')) {
     setTimeout(() => {
-      showToast(t('welcomeMsg.title'), t('welcomeMsg.subtitle'));
+      showToast('Bienvenido a RK Tube', '');
     }, 2000);
   }
 

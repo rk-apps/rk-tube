@@ -149,6 +149,15 @@ JSON.parse = function () {
         }
     }
 
+    // The native guide footer is separate from items. Hide only its Settings entry.
+    const footerItems = r.footer?.guideSectionRenderer?.items;
+    if (r.items?.[0]?.guideSectionRenderer && sidebarAllowlist?.length && Array.isArray(footerItems)) {
+        r.footer.guideSectionRenderer.items = footerItems.filter(entry => {
+            const item = entry.guideEntryRenderer;
+            return !item || (!item.navigationEndpoint?.applicationSettingsEndpoint && item.icon?.iconType !== 'SETTINGS');
+        });
+    }
+
     return r;
 }
 
