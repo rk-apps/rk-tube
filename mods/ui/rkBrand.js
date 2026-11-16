@@ -29,6 +29,16 @@ function mountBrand() {
     el.appendChild(title);
     el.appendChild(sub);
     document.body.appendChild(el);
+
+    // rk-tube: the owner asked for the sign-in page to stay exactly as in TizenTube,
+    // so the brand never covers it. The activation screen is the only one carrying the
+    // 'yt.be/activate' marker; hide the brand while that marker is on screen.
+    function syncBrandVisibility() {
+        const onSignIn = !!document.body && document.body.textContent.includes('yt.be/activate');
+        el.style.display = onSignIn ? 'none' : '';
+    }
+    setInterval(syncBrandVisibility, 700);
+    syncBrandVisibility();
 }
 
 mountBrand();
