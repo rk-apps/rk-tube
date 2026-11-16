@@ -223,11 +223,6 @@ function execute_once_dom_loaded() {
   document.addEventListener('keydown', eventHandler, true);
   document.addEventListener('keypress', eventHandler, true);
   document.addEventListener('keyup', eventHandler, true);
-  if (configRead('showWelcomeToast')) {
-    setTimeout(() => {
-      showToast('Bienvenido a RK Tube', '');
-    }, 2000);
-  }
 
   if (configRead('reloadHomeOnStartup')) {
     if (configRead('launchToOnStartup')) {
