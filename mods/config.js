@@ -57,9 +57,11 @@ const defaultConfig = {
   launchToOnStartup: null,
   reloadHomeOnStartup: true,
   disabledSidebarContents: [],
+  sidebarAllowlist: ['search', 'FEtopics', 'FEsubscriptions', 'FElibrary'], // rk-tube: sidebar shows only Buscar, Principal, Suscripciones, Biblioteca (empty array = show everything, upstream behavior)
   sidebarContentsOrder: [],
   disableChannelsOnSidebar: false,
-  enableUpdater: true,
+  enableUpdater: false, // rk-tube: updater off by default, no notices; manual check stays in Settings
+  updateRepo: null, // rk-tube: GitHub repo ("owner/name") that serves rk-tube releases; null = no update source configured yet, so the updater never points at upstream TizenTube Cobalt builds
   autoFrameRate: false,
   autoFrameRatePauseVideoFor: 0,
   enableSigninReminder: false,

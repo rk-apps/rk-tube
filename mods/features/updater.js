@@ -7,7 +7,7 @@ import { t } from 'i18next';
 // If TizenTube is not running on Cobalt, do nothing
 // Add a timeout since reloading the home page while the updater pop up is shown causes the pop up to instantly disappear.
 setTimeout(() => {
-    if (window.h5vcc && window.h5vcc.tizentube && configRead('enableUpdater')) {
+    if (window.h5vcc && window.h5vcc.tizentube && configRead('enableUpdater') && configRead('updateRepo')) {
         const currentEpoch = Math.floor(Date.now() / 1000);
         if (configRead('dontCheckUpdateUntil') > currentEpoch) {
             console.info('Skipping update check until', new Date(configRead('dontCheckUpdateUntil') * 1000).toLocaleString());
@@ -16,7 +16,10 @@ setTimeout(() => {
 }, 2500);
 
 function getLatestRelease() {
-    return fetch('https://api.github.com/repos/reisxd/TizenTubeCobalt/releases/latest')
+    // rk-tube: releases come only from the configured repo, never from upstream TizenTube Cobalt
+    const repo = configRead('updateRepo');
+    if (!repo) return Promise.reject(new Error('No update repo configured'));
+    return fetch(`https://api.github.com/repos/${repo}/releases/latest`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -26,6 +29,14 @@ function getLatestRelease() {
 }
 
 function checkForUpdates(showNoUpdateToast) {
+    // rk-tube: without a configured update repo there is nothing to check; say so instead of
+    // offering upstream APKs that cannot be installed over this package anyway.
+    if (!configRead('updateRepo')) {
+        if (showNoUpdateToast) {
+            showToast('Actualizaciones', 'Todavía no hay una fuente de actualizaciones configurada para rk-tube.', null);
+        }
+        return;
+    }
     const currentAppVersion = window.h5vcc.tizentube.GetVersion();
     const currentEpoch = Math.floor(Date.now() / 1000);
 

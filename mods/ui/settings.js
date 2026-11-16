@@ -285,11 +285,13 @@ export default function modernUI(update, parameters) {
                     name: t('settings.options.misc.options.longPress'),
                     value: 'enableLongPress'
                 },
+                /* rk-tube: Shorts toggle moved to the main sidebar
                 {
                     name: t('settings.options.misc.options.shorts'),
                     icon: 'YOUTUBE_SHORTS_FILL_24',
                     value: 'enableShorts'
                 },
+                */
                 {
                     name: t('settings.options.misc.options.videoPreviews'),
                     value: 'enablePreviews'

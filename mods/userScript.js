@@ -24,5 +24,6 @@ import "./features/videoQueuing.js";
 import "./features/enableFeatures.js";
 import "./ui/customUI.js";
 import "./ui/customGuideAction.js";
+import "./ui/rkBrand.js";
 import "./features/autoFrameRate.js";
 import "./ui/clock.js";

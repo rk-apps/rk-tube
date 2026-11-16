@@ -87,6 +87,7 @@ JSON.parse = function () {
 
     const disabledSidebarContents = configRead('disabledSidebarContents');
     const disableChannelsOnSidebar = configRead('disableChannelsOnSidebar');
+    const sidebarAllowlist = configRead('sidebarAllowlist');
     if (r.items && Array.isArray(r.items) && r.items[0].guideSectionRenderer) {
         for (let i = 0; i < r.items.length; i++) {
             const section = r.items[i].guideSectionRenderer;
@@ -94,15 +95,40 @@ JSON.parse = function () {
             for (let j = 0; j < section.items.length; j++) {
                 const item = section.items[j].guideEntryRenderer;
                 if (!item) continue;
-                if ((disabledSidebarContents?.length &&
-                    disabledSidebarContents.includes(item.navigationEndpoint?.browseEndpoint ?
-                        item.navigationEndpoint.browseEndpoint.browseId :
-                        'search'))
-                    || (disableChannelsOnSidebar && item?.thumbnail)) {
+                // rk-tube: only filter entries positively identified by browseId or as search.
+                // Entries with other endpoint types (Settings, Help, etc.) are always kept so
+                // configuration stays reachable.
+                const browseId = item.navigationEndpoint?.browseEndpoint?.browseId;
+                const isSearch = !!item.navigationEndpoint?.searchEndpoint;
+                if (browseId || isSearch) {
+                    const itemId = browseId || 'search';
+                    // rk-tube: when an allowlist is set, keep only those entries (plus our own TT_ items)
+                    if (sidebarAllowlist?.length && !sidebarAllowlist.includes(itemId) && !String(itemId).startsWith('TT_')) {
+                        section.items.splice(j, 1);
+                        j--;
+                        continue;
+                    }
+                    if (disabledSidebarContents?.length && disabledSidebarContents.includes(itemId)) {
+                        section.items.splice(j, 1);
+                        j--;
+                        continue;
+                    }
+                }
+                if (disableChannelsOnSidebar && item?.thumbnail) {
                     section.items.splice(j, 1);
                     j--;
                 }
             }
+        }
+        // rk-tube: Shorts on/off control moved to the main sidebar (out of Settings > Misc).
+        // Guide entries have no text-checkbox renderer; the checkbox state is shown in the icon.
+        const firstSection = r.items[0].guideSectionRenderer;
+        if (!firstSection.items.some(it => it.guideEntryRenderer?.navigationEndpoint?.browseEndpoint?.browseId === 'TT_SHORTS_TOGGLE')) {
+            firstSection.items.push(GuideEntryRenderer(
+                'Shorts',
+                { browseEndpoint: { browseId: 'TT_SHORTS_TOGGLE' } },
+                configRead('enableShorts') ? 'CHECK_BOX' : 'CHECK_BOX_OUTLINE_BLANK'
+            ));
         }
     }
 
@@ -110,7 +136,7 @@ JSON.parse = function () {
 }
 
 configChangeEmitter.addEventListener('configChange', (e) => {
-    if (e.detail.key === 'disabledSidebarContents' || e.detail.key === 'disableChannelsOnSidebar' || e.detail.key === 'sidebarContentsOrder') {
+    if (e.detail.key === 'disabledSidebarContents' || e.detail.key === 'disableChannelsOnSidebar' || e.detail.key === 'sidebarContentsOrder' || e.detail.key === 'enableShorts') {
         const commandExecutor = getCommandExecutor();
         if (commandExecutor) {
             commandExecutor.executeFunction(new commandExecutor.commandFunction('reloadGuideAction'));

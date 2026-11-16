@@ -66,6 +66,10 @@ export function patchResolveCommand() {
                             return true;
                         }
                     }
+                } else if (cmd?.browseEndpoint?.browseId === 'TT_SHORTS_TOGGLE') {
+                    // rk-tube: sidebar Shorts toggle
+                    customAction('TOGGLE_SHORTS');
+                    return true;
                 } else if (cmd.customAction) {
                     customAction(cmd.customAction.action, cmd.customAction.parameters);
                     return true;
@@ -289,6 +293,10 @@ function customAction(action, parameters) {
                 overlayMessageRenderer(t('player.share.qrCodeScanMessage')),
                 QrCodeRenderer(qrDataUrl)
             ]), 'tt-share-modal');
+            break;
+        case 'TOGGLE_SHORTS':
+            configWrite('enableShorts', !configRead('enableShorts'));
+            showToast('Shorts', configRead('enableShorts') ? 'Activados' : 'Desactivados', null);
             break;
         case 'SHOW_GUIDE_BUTTONS':
             showGuideSettings('SHOW_GUIDE_BUTTONS', parameters);
