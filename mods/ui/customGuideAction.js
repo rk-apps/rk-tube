@@ -97,9 +97,14 @@ JSON.parse = function () {
                 if (!item) continue;
                 const browseId = item.navigationEndpoint?.browseEndpoint?.browseId;
                 const isSearch = !!item.navigationEndpoint?.searchEndpoint;
+                if (browseId === 'TT_SHORTS_LABEL' || browseId === 'TT_SHORTS_TOGGLE') {
+                    section.items.splice(j, 1);
+                    j--;
+                    continue;
+                }
                 if (sidebarAllowlist?.length) {
-                    // rk-tube: the owner approved a sidebar with exactly the allowlist entries
-                    // plus our own TT_ rows. Every other entry - including Settings/Help, whose
+                    // Keep only the configured sidebar entries.
+                    // Other entries - including Settings/Help, whose
                     // endpoints carry no browseId - is hidden from the sidebar only. Their code
                     // and features stay untouched. Explicit owner instruction, do not re-add.
                     const itemId = browseId || (isSearch ? 'search' : null);
@@ -123,33 +128,13 @@ JSON.parse = function () {
             }
         }
         // rk-tube: in allowlist mode, drop sections left empty after filtering
-        // (e.g. a Settings/Help-only section). The first section stays: our TT_ rows
-        // are injected into it below.
+        // (e.g. a Settings/Help-only section). Keep the first native section.
         if (sidebarAllowlist?.length) {
             r.items = r.items.filter((entry, idx) => idx === 0 || !entry.guideSectionRenderer || entry.guideSectionRenderer.items.length > 0);
         }
-        // rk-tube: Shorts on/off control moved to the main sidebar (out of Settings > Misc),
-        // as TWO rows per the approved design: a "Shorts" label row and, below it, the
-        // "Habilitar" row carrying the checkbox state. Guide entries have no text-checkbox
-        // renderer; the checkbox state is shown in the icon of the "Habilitar" row.
-        const firstSection = r.items[0].guideSectionRenderer;
-        if (!firstSection.items.some(it => it.guideEntryRenderer?.navigationEndpoint?.browseEndpoint?.browseId === 'TT_SHORTS_LABEL')) {
-            firstSection.items.push(GuideEntryRenderer(
-                'Shorts',
-                { browseEndpoint: { browseId: 'TT_SHORTS_LABEL' } },
-                'YOUTUBE_SHORTS_FILL_24'
-            ));
-        }
-        if (!firstSection.items.some(it => it.guideEntryRenderer?.navigationEndpoint?.browseEndpoint?.browseId === 'TT_SHORTS_TOGGLE')) {
-            firstSection.items.push(GuideEntryRenderer(
-                'Habilitar',
-                { browseEndpoint: { browseId: 'TT_SHORTS_TOGGLE' } },
-                configRead('enableShorts') ? 'CHECK_BOX' : 'CHECK_BOX_OUTLINE_BLANK'
-            ));
-        }
     }
 
-    // The native guide footer is separate from items. Hide only its Settings entry.
+    // Hide the native sidebar Settings entry only; its implementation remains intact.
     const footerItems = r.footer?.guideSectionRenderer?.items;
     if (r.items?.[0]?.guideSectionRenderer && sidebarAllowlist?.length && Array.isArray(footerItems)) {
         r.footer.guideSectionRenderer.items = footerItems.filter(entry => {

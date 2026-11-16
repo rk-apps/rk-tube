@@ -23,7 +23,7 @@ const defaultConfig = {
   enableHqThumbnails: false,
   enableChapters: true,
   enableLongPress: true,
-  enableShorts: true,
+  enableShorts: false,
   dontCheckUpdateUntil: 0,
   enableWhoIsWatchingMenu: false,
   permanentlyEnableWhoIsWatchingMenu: false,
@@ -85,6 +85,7 @@ try {
 }
 
 export function configRead(key) {
+  if (key === 'enableShorts') return false;
   if (localConfig[key] === undefined) {
     console.warn('Populating key', key, 'with default value', defaultConfig[key]);
     localConfig[key] = defaultConfig[key];
