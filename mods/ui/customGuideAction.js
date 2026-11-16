@@ -87,7 +87,7 @@ JSON.parse = function () {
 
     // Retain the original endpoints, but arrange only the requested visible menu.
     if (r.items?.[0]?.guideSectionRenderer) {
-        const ids = ['search', 'FEtopics', 'FEsubscriptions', 'FElibrary'];
+        const ids = ['search', 'FEtopics', 'FEsubscriptions', 'library'];
         const entries = [];
         let settings;
         const sections = [...r.items, r.footer];
@@ -103,9 +103,17 @@ JSON.parse = function () {
         }
         const ordered = ids.map(id => entries.find(entry => {
             const ep = entry.guideEntryRenderer.navigationEndpoint;
-            return id === 'search' ? !!ep?.searchEndpoint : ep?.browseEndpoint?.browseId === id;
+            if (id === 'search') return !!ep?.searchEndpoint;
+            if (id === 'library') return ['FElibrary', 'FEmy_youtube'].includes(ep?.browseEndpoint?.browseId);
+            return ep?.browseEndpoint?.browseId === id;
         })).filter(Boolean);
-        if (settings) ordered.push(settings);
+        if (settings) {
+            const item = settings.guideEntryRenderer;
+            item.accessibility = item.accessibility || {accessibilityData:{label:item.formattedTitle?.simpleText || 'Settings'}};
+            item.formattedTitle = {simpleText:''};
+            if (ordered.length) ordered[ordered.length-1].guideEntryRenderer.dividerStyle = 'GUIDE_ENTRY_RENDERER_DIVIDER_STYLE_PADDED_BAR';
+            ordered.push(settings);
+        }
         r.items[0].guideSectionRenderer.items = ordered;
         for (const sectionEntry of r.items.slice(1)) {
             if (sectionEntry.guideSectionRenderer) sectionEntry.guideSectionRenderer.items = [];
@@ -124,3 +132,19 @@ configChangeEmitter.addEventListener('configChange', (e) => {
         }
     }
 });
+// The native guide may already be loaded before the injected script executes.
+// Reload it once the original command executor becomes available.
+let guideRefreshAttempts = 0;
+function refreshInitialGuide() {
+    try {
+        if (window._yttv) {
+            const executor = getCommandExecutor();
+            if (executor?.executeFunction && executor?.commandFunction) {
+                executor.executeFunction(new executor.commandFunction('reloadGuideAction'));
+                return;
+            }
+        }
+    } catch (err) { console.warn('RK guide refresh not ready', err); }
+    if (++guideRefreshAttempts < 30) setTimeout(refreshInitialGuide, 1000);
+}
+setTimeout(refreshInitialGuide, 1000);
