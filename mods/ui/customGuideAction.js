@@ -95,19 +95,21 @@ JSON.parse = function () {
             for (let j = 0; j < section.items.length; j++) {
                 const item = section.items[j].guideEntryRenderer;
                 if (!item) continue;
-                // rk-tube: only filter entries positively identified by browseId or as search.
-                // Entries with other endpoint types (Settings, Help, etc.) are always kept so
-                // configuration stays reachable.
                 const browseId = item.navigationEndpoint?.browseEndpoint?.browseId;
                 const isSearch = !!item.navigationEndpoint?.searchEndpoint;
-                if (browseId || isSearch) {
-                    const itemId = browseId || 'search';
-                    // rk-tube: when an allowlist is set, keep only those entries (plus our own TT_ items)
-                    if (sidebarAllowlist?.length && !sidebarAllowlist.includes(itemId) && !String(itemId).startsWith('TT_')) {
+                if (sidebarAllowlist?.length) {
+                    // rk-tube: the owner approved a sidebar with exactly the allowlist entries
+                    // plus our own TT_ rows. Every other entry - including Settings/Help, whose
+                    // endpoints carry no browseId - is hidden from the sidebar only. Their code
+                    // and features stay untouched. Explicit owner instruction, do not re-add.
+                    const itemId = browseId || (isSearch ? 'search' : null);
+                    if (!itemId || (!sidebarAllowlist.includes(itemId) && !String(itemId).startsWith('TT_'))) {
                         section.items.splice(j, 1);
                         j--;
                         continue;
                     }
+                } else if (browseId || isSearch) {
+                    const itemId = browseId || 'search';
                     if (disabledSidebarContents?.length && disabledSidebarContents.includes(itemId)) {
                         section.items.splice(j, 1);
                         j--;
@@ -119,6 +121,12 @@ JSON.parse = function () {
                     j--;
                 }
             }
+        }
+        // rk-tube: in allowlist mode, drop sections left empty after filtering
+        // (e.g. a Settings/Help-only section). The first section stays: our TT_ rows
+        // are injected into it below.
+        if (sidebarAllowlist?.length) {
+            r.items = r.items.filter((entry, idx) => idx === 0 || !entry.guideSectionRenderer || entry.guideSectionRenderer.items.length > 0);
         }
         // rk-tube: Shorts on/off control moved to the main sidebar (out of Settings > Misc),
         // as TWO rows per the approved design: a "Shorts" label row and, below it, the
