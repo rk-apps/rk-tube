@@ -61,7 +61,7 @@ const defaultConfig = {
   sidebarContentsOrder: [],
   disableChannelsOnSidebar: false,
   enableUpdater: false, // rk-tube: updater off by default, no notices; manual check stays in Settings
-  updateRepo: null, // rk-tube: GitHub repo ("owner/name") that serves rk-tube releases; null = no update source configured yet, so the updater never points at upstream TizenTube Cobalt builds
+  updateRepo: 'rk-apps/rk-tube', // rk-tube: updates come only from the rk-apps/rk-tube GitHub releases, never from upstream TizenTube Cobalt builds; updater stays off by default (enableUpdater: false)
   autoFrameRate: false,
   autoFrameRatePauseVideoFor: 0,
   enableSigninReminder: false,
