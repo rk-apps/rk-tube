@@ -24,6 +24,8 @@ import "./features/videoQueuing.js";
 import "./features/enableFeatures.js";
 import "./ui/customUI.js";
 import "./ui/customGuideAction.js";
+import "./ui/internalSearch.js";
+import "./ui/playlistGridOnly.js";
 import "./features/autoFrameRate.js";
 import "./ui/clock.js";
 

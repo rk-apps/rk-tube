@@ -87,7 +87,7 @@ JSON.parse = function () {
 
     // Retain the original endpoints, but arrange only the requested visible menu.
     if (r.items?.[0]?.guideSectionRenderer) {
-        const ids = ['search', 'FEtopics', 'FEsubscriptions', 'library'];
+        const ids = ['search', 'library'];
         const entries = [];
         let settings;
         const sections = [...r.items, r.footer];
